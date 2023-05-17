@@ -1,5 +1,5 @@
 # Регулярные выражения(regular expressions, regexp/regex/re) - шаблоны строк
-import re
+# import re
 
 #
 # name = input('enter your name: ')
