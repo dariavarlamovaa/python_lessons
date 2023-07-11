@@ -1,0 +1,111 @@
+Таблица Client:
+INNClient - идентификационный номер клиента (первичный ключ)
+Client – клиент
+Status - место продажи
+ 
+Таблица ClientGoods:
+IDParty – (первичный ключ)
+ID – (внешний ключ)
+INNClient – идентификационный номер клиента (внешний ключ)
+CostUnit – стоимость за единицу
+Count - количество приобретенного товара
+ 
+Таблица SallerGoods:
+ID – (первичный ключ)
+Code – код товара
+INNSeller – идентификационный код продавца (внешний ключ)
+DateStart – дата
+Goods – товар
+CostUnit – стоимость за единицу
+Count - количество товара на складе
+ 
+Таблица Seller:
+INNSeller - идентификационный код продавца (первичный ключ)
+Seller – продавец
+Status - статус
+ 
+1. Показать какие продавцы продают какие товары.
+SELECT s.Seller, sg.Goods
+From Seller s, SallerGoods sg
+WHERE s.INNSeller = sg.INNSeller
+LIMIT(точное количество выводов) 5 OFFSET(пропуская первые) 3
+(LIMIT 1(с), 5(сколько))
+ 
+2. Вывести продавцов и клиентов (пары), связанные м/у собой приобретенным товаром.
+SELECT s.Seller, c.Client
+From Seller s, SallerGoods sg, Client c, ClientGoods cg
+WHERE s.INNSeller = sg.INNSeller and c.INNClient = cg.INNClient and sg.ID = cg.ID
+ 
+3. Вывести данные о товаре в алфавитном порядке.
+SELECT *
+From SallerGoods sg
+ORDER BY sg.Goods
+ 
+4. Вывести посредников, поставляющих товар для фирмы.
+SELECT *
+From Seller
+WHERE Status = "посредник"
+ 
+5. Вывести список товара, поставляемого производителями.
+SELECT DISTINCT sg.Goods
+From Seller s, SallerGoods sg
+WHERE s.INNSeller = sg.INNSeller and s.Status = "производитель"
+ 
+6. На какую сумму было всего куплено каждого товара фирмой.
+SELECT Goods, round(CostUnit * Count)
+From SallerGoods
+ 
+7. На какую сумму было продано каждого товара магазинам.
+ 
+ 
+8. Выведите список товара, проданного в кафе.
+SELECT Distinct sg.Goods
+From Client c, SallerGoods sg, ClientGoods cg
+WHERE c.Status like "кафе" and sg.ID = cg.ID and c.INNClient = cg.INNClient
+ 
+9. Определить какой товар был куплен у посредников.
+SELECT Distinct sg.Goods
+From Client c, SallerGoods sg, ClientGoods cg, Seller s
+WHERE s.Status like "посредник" and sg.ID = cg.ID and s.INNSeller = sg.INNSeller
+ 
+10. Написать запрос, который выводит название товара и прибыль, полученную от его продажи (при продаже всех единиц товара).
+SELECT sg.Goods, SUM(cg.CostUnit * cg.Count) as Profit
+FROM ClientGoods cg, SallerGoods sg
+WHERE sg.ID = cg.ID
+GROUP BY sg.Goods
+ 
+11. Определите какие клиенты не покупали подсолнечное масло. 
+SELECT c.Client
+FROM Client c, SallerGoods sg, ClientGoods cg
+WHERE c.INNClient = cg.INNClient and sg.ID = cg.ID and sg.Goods NOT LIKE "масло подсолнечное"
+GROUP BY c.Client
+ 
+12. Определите поставщиков, сделки с которыми заключили 10-11/11/2007.
+SELECT s.Seller
+FROM SallerGoods sg, Seller s
+WHERE s.INNSeller = sg.INNSeller and (sg.DateStart GLOB "2007-11-10*" or sg.DateStart GLOB "2007-11-11*")
+GROUP BY s.Seller
+ 
+13. Показать код и наименование товара, купленного посредниками.
+SELECT c.Client, sg.Code, sg.Goods
+FROM SallerGoods sg, ClientGoods cg, Client c
+WHERE sg.ID = cg.ID and cg.INNClient = c.INNClient and c.Status = "посредник"
+ 
+14. Вывести список клиентов и сумму прибыли за каждый товар, полученную от продажи черного перца.
+ 
+SELECT c.Client, (cg.CostUnit - sg.CostUnit) * cg.Count as profit
+FROM SallerGoods sg, ClientGoods cg, Client c
+WHERE sg.ID = cg.ID and c.INNClient = cg.INNClient and sg.Goods LIKE "Перец черный%"
+ 
+15. Выведите список товаров в обратном порядке, если товар куплен у производителя и продан в кафе. 
+SELECT sg.Goods
+FROM SallerGoods sg, ClientGoods cg, Client c, Seller s
+WHERE s.INNSeller = sg.INNSeller and sg.ID = cg.ID and cg.INNClient = c.INNClient and s.Status = "производитель" and c.Status = "кафе"
+GROUP BY sg.Goods
+ORDER BY sg.Goods DESC
+ 
+16. Вывести список товаров, если фирма купила их на сумму больше 1000.
+SELECT sg.Goods
+FROM SallerGoods sg, ClientGoods cg
+WHERE sg.ID = cg.ID and cg.CostUnit * cg.Count > 1000
+GROUP BY sg.Goods
