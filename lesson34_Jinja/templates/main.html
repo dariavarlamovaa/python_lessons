@@ -1,0 +1,11 @@
+{% include 'header.html' ignore missing %}
+{% import 'dialogues.html' as dlg %}
+
+<ul>
+    {% for user in users -%}
+    <li>{{ user.name }}</li>
+    {% endfor %}
+</ul>
+
+{{ dlg.dialogue_1('Attention!', 'This is text dialogue') }}
+{% include 'footer.html' %}

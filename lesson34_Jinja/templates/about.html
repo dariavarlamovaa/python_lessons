@@ -1,0 +1,16 @@
+{% extends 'page.html' %}
+
+{% block title %}О сайте{% endblock %}
+
+{% block content %}
+<!--{{ super() }}-->
+<!--<h1>{{ self.title() }}</h1>-->
+<!--<p>Описание сайта</p>-->
+{% block table_contents %}
+<ul>
+    {% for li in list_table -%}
+    <li>{% block item scoped%} {{ li }} {% endblock %}</li>
+    {% endfor %}
+</ul>
+{% endblock table_contents%}
+{% endblock content %}
